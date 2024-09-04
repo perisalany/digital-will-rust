@@ -1,96 +1,93 @@
-# Garage Management System
 
-This project is a decentralized platform built on the Internet Computer for managing customers, vehicles, services, inventory, and invoices in a garage. It allows users to create and manage records for customers, their vehicles, services performed on those vehicles, inventory items, and invoices.
+# Blockchain-Based Digital Will Management System
+
+This project implements a decentralized will management system using Rust and the Internet Computer. The system allows users to manage wills, assets, beneficiaries, and executors in a secure and distributed manner. 
 
 ## Key Features
 
-1. **Customer Management**
+1. **User Management**
+   - **Create User:** Allows users to create their profiles.
+   - **Get User:** Retrieve details of a specific user.
+   - **Get All Users:** Retrieve a list of all users in the system.
 
-   - **Add Customer:** Allows users to create customer profiles.
-   - **Update Customer:** Allows users to update existing customer profiles.
-   - **Get All Customers:** Retrieve a list of all customers in the system.
+2. **Will Management**
+   - **Create Will:** Allows users to create wills by assigning assets and beneficiaries.
+   - **Get Will:** Retrieve a specific will by its ID.
+   - **Get All Wills:** Retrieve a list of all wills in the system.
 
-2. **Vehicle Management**
+3. **Executor Management**
+   - **Create Executor:** Create an executor to manage wills.
+   - **Assign Executor:** Assign an executor to a will.
+   - **Get Executor:** Retrieve details of a specific executor.
+   - **Get All Executors:** Retrieve a list of all executors in the system.
 
-   - **Add Vehicle:** Allows users to add vehicles to the system.
-   - `license_plate: AB-12-CD-3456`
-   - **Get All Vehicles:** Retrieve a list of all vehicles in the system.
+4. **Asset Management**
+   - **Add Asset:** Allows users to add assets to their wills.
+   - **Get All Assets:** Retrieve a list of all assets within the system.
 
-3. **Service Management**
-
-   - **Create Service:** Allows users to record services performed on vehicles.
-   - **Get All Services:** Retrieve a list of all services performed.
-
-4. **Inventory Management**
-
-   - **Create Inventory Item:** Allows users to add items to the inventory.
-   - **Get Inventory Quantity:** Retrieve the quantity of a specific part in the inventory.
-   - **Get All Inventory Items:** Retrieve a list of all items in the inventory.
-
-5. **Invoice Management**
-   - **Create Invoice:** Allows users to create invoices for customers.
-   - **Get Customer Invoices:** Retrieve and sum invoices for a specific customer.
-   - **Get All Invoices:** Retrieve a list of all invoices.
+5. **Beneficiary Management**
+   - **Add Beneficiary:** Allows users to assign beneficiaries to their wills.
+   - **Get All Beneficiaries:** Retrieve a list of all beneficiaries in the system.
 
 ## Error Handling
-
-- **Not Found:** Returns an error if a requested item is not found.
+- **Not Found:** Returns an error if a requested item (user, will, asset, etc.) is not found.
 - **Unauthorized Access:** Returns an error if a user tries to perform an action without necessary permissions.
-
-# Sample Payloads
 
 ## Sample Payloads
 
-### CustomerPayload
+### UserPayload
 
 ```json
 {
   "name": "John Doe",
-  "contact": "0734566787",
   "email": "john.doe@example.com"
 }
 ```
 
-### VehiclePayload
+### WillPayload
 
 ```json
 {
-  "customer_id": 1,
-  "make": "Toyota",
-  "model": "Corolla",
-  "year": 2020,
-  "license_plate": "AB-12-CD-3456"
+  "user_id": 1,
+  "executor_id": 1
 }
 ```
 
-### ServicePayload
+### AssetPayload
 
 ```json
 {
-  "vehicle_id": 1,
-  "description": "Oil change",
-  "cost": 50
+  "will_id": 1,
+  "name": "House",
+  "value": 100000
 }
 ```
 
-### InventoryPayload
+### BeneficiaryPayload
 
 ```json
 {
-  "part_name": "Brake Pad",
-  "quantity": 100,
-  "cost": 25
+  "will_id": 1,
+  "name": "Jane Doe",
+  "share": 50
 }
 ```
 
-### InvoicePayload
+### ExecutorPayload
 
 ```json
 {
-  "customer_id": 1,
-  "amount": 150
+  "name": "John Executor",
+  "contact": "0734567890"
 }
 ```
+
+## Technologies Used
+
+- **Rust:** For implementing logic and handling data structures.
+- **Internet Computer (IC):** Decentralized infrastructure for managing persistent data.
+- **Candid:** For serializing and deserializing data across the decentralized system.
+- **ic_stable_structures:** For using stable structures in memory to store and retrieve data efficiently.
 
 ## Requirements
 
