@@ -270,6 +270,182 @@ struct AssignExecutorPayload {
 
 // Function to create and manage users
 
+// Update user details
+#[ic_cdk::update]
+fn update_user(user_id: u64, payload: UserPayload) -> Result<User, String> {
+    USERS_STORAGE.with(|storage| {
+        let mut storage_ref = storage.borrow_mut();
+
+        let user = storage_ref
+            .get(&user_id)
+            .ok_or_else(|| "User not found".to_string())?;
+
+        // Update user fields
+        let updated_user = User {
+            id: user.id,
+            name: payload.name,
+            email: payload.email,
+            created_at: user.created_at,
+        };
+
+        storage_ref.insert(user.id, updated_user.clone());
+        Ok(updated_user)
+    })
+}
+
+// Update executor details
+#[ic_cdk::update]
+fn update_executor(executor_id: u64, payload: ExecutorPayload) -> Result<Executor, String> {
+    EXECUTORS_STORAGE.with(|storage| {
+        let mut storage_ref = storage.borrow_mut();
+
+        let executor = storage_ref
+            .get(&executor_id)
+            .ok_or_else(|| "Executor not found".to_string())?;
+
+        // Update executor fields
+        let updated_executor = Executor {
+            id: executor.id,
+            name: payload.name,
+            contact: payload.contact,
+            created_at: executor.created_at,
+        };
+
+        storage_ref.insert(executor.id, updated_executor.clone());
+        Ok(updated_executor)
+    })
+}
+
+// Update will executor
+#[ic_cdk::update]
+fn update_will_executor(will_id: u64, new_executor_id: u64) -> Result<Will, String> {
+    WILLS_STORAGE.with(|storage| {
+        let mut storage_ref = storage.borrow_mut();
+
+        let mut will = storage_ref
+            .get(&will_id)
+            .ok_or_else(|| "Will not found".to_string())?;
+
+        if EXECUTORS_STORAGE
+            .with(|executor_storage| executor_storage.borrow().get(&new_executor_id))
+            .is_none()
+        {
+            return Err("Executor not found".to_string());
+        }
+
+        will.executor_id = new_executor_id;
+        storage_ref.insert(will.id, will.clone());
+
+        Ok(will)
+    })
+}
+
+// Delete user by id
+#[ic_cdk::update]
+fn delete_user(user_id: u64) -> Result<(), String> {
+    USERS_STORAGE.with(|storage| {
+        if storage.borrow_mut().remove(&user_id).is_none() {
+            return Err("User not found".to_string());
+        }
+        Ok(())
+    })
+}
+
+// Delete will by id
+#[ic_cdk::update]
+fn delete_will(will_id: u64) -> Result<(), String> {
+    WILLS_STORAGE.with(|storage| {
+        if storage.borrow_mut().remove(&will_id).is_none() {
+            return Err("Will not found".to_string());
+        }
+        Ok(())
+    })
+}
+
+// Delete executor by id
+#[ic_cdk::update]
+fn delete_executor(executor_id: u64) -> Result<(), String> {
+    EXECUTORS_STORAGE.with(|storage| {
+        if storage.borrow_mut().remove(&executor_id).is_none() {
+            return Err("Executor not found".to_string());
+        }
+        Ok(())
+    })
+}
+
+// List all assets for a will
+#[ic_cdk::query]
+fn list_assets_for_will(will_id: u64) -> Result<Vec<Asset>, String> {
+    ASSETS_STORAGE.with(|storage| {
+        let assets: Vec<Asset> = storage
+            .borrow()
+            .iter()
+            .filter(|(_, asset)| asset.will_id == will_id)
+            .map(|(_, asset)| asset.clone())
+            .collect();
+
+        if assets.is_empty() {
+            Err("No assets found for this will.".to_string())
+        } else {
+            Ok(assets)
+        }
+    })
+}
+
+// List all beneficiaries for a will
+#[ic_cdk::query]
+fn list_beneficiaries_for_will(will_id: u64) -> Result<Vec<Beneficiary>, String> {
+    BENEFICIARIES_STORAGE.with(|storage| {
+        let beneficiaries: Vec<Beneficiary> = storage
+            .borrow()
+            .iter()
+            .filter(|(_, beneficiary)| beneficiary.will_id == will_id)
+            .map(|(_, beneficiary)| beneficiary.clone())
+            .collect();
+
+        if beneficiaries.is_empty() {
+            Err("No beneficiaries found for this will.".to_string())
+        } else {
+            Ok(beneficiaries)
+        }
+    })
+}
+
+// Check if a will has been executed
+#[ic_cdk::query]
+fn check_will_status(will_id: u64) -> Result<bool, String> {
+    WILLS_STORAGE.with(|storage| {
+        let will = storage
+            .borrow()
+            .get(&will_id)
+            .ok_or_else(|| "Will not found".to_string())?;
+
+        Ok(will.is_executed)
+    })
+}
+
+// Execute will (mark as executed)
+#[ic_cdk::update]
+fn execute_will(will_id: u64) -> Result<Will, String> {
+    WILLS_STORAGE.with(|storage| {
+        let mut storage_ref = storage.borrow_mut();
+
+        let mut will = storage_ref
+            .get(&will_id)
+            .ok_or_else(|| "Will not found".to_string())?;
+
+        if will.is_executed {
+            return Err("Will has already been executed.".to_string());
+        }
+
+        will.is_executed = true;
+        storage_ref.insert(will.id, will.clone());
+
+        Ok(will)
+    })
+}
+
+
 #[ic_cdk::update]
 fn create_user(payload: UserPayload) -> Result<User, String> {
     // Ensure the user payload is valid
